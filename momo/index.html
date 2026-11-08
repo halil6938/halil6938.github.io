@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Momo le Habess</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Old+Standard+TT:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --board: #ecedee;
+    --ink: #2a2424;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: #d9dadc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: "Old Standard TT", Georgia, serif;
+    color: var(--ink);
+    overflow: hidden;
+  }
+  .stage {
+    position: relative;
+    width: min(100vw, calc((100vh - 64px) * 1000 / 900));
+    aspect-ratio: 1000 / 900;
+    background:
+      radial-gradient(ellipse 9% 6% at 30% 9%, rgba(255,255,255,.95), rgba(255,255,255,0) 70%),
+      radial-gradient(ellipse 12% 5% at 78% 10%, rgba(255,255,255,.9), rgba(255,255,255,0) 70%),
+      radial-gradient(ellipse 8% 18% at 8% 14%, rgba(255,255,255,.7), rgba(255,255,255,0) 70%),
+      radial-gradient(ellipse 70% 40% at 50% 100%, rgba(150,152,160,.35), rgba(150,152,160,0) 70%),
+      linear-gradient(170deg, #f4f4f5 0%, #e6e7e9 55%, #d7d8db 100%);
+    box-shadow: inset 0 0 80px rgba(0,0,0,.12);
+    overflow: hidden;
+  }
+  .stage svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .flicker {
+    position: absolute; inset: 0; pointer-events: none;
+    background: #000; opacity: 0; mix-blend-mode: multiply;
+  }
+  .controls { height: 64px; display: flex; align-items: center; gap: 12px; }
+  button {
+    font: 700 16px "Old Standard TT", Georgia, serif;
+    padding: 8px 18px;
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    background: #f3efe3;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  button:hover { background: #e7e0cc; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+<svg viewBox="0 0 1000 900" xmlns="http://www.w3.org/2000/svg" aria-label="Momo le Habess en stop motion">
+  <defs>
+    <!-- "boiling line" stop-motion wobble for the marker drawing -->
+    <filter id="boil" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence id="boilNoise" type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+
+    <!-- crumpled newspaper: displacement + crease lighting -->
+    <filter id="crumple" x="-60%" y="-60%" width="220%" height="220%" color-interpolation-filters="sRGB">
+      <feTurbulence id="crumpleNoise" type="turbulence" baseFrequency="0.022" numOctaves="3" seed="11" result="n"/>
+      <feDisplacementMap id="crumpleDisp" in="SourceGraphic" in2="n" scale="90" xChannelSelector="R" yChannelSelector="B" result="d"/>
+      <feDiffuseLighting id="crumpleLight" in="n" surfaceScale="10" diffuseConstant="1.15" lighting-color="#ffffff" result="light">
+        <feDistantLight azimuth="235" elevation="55"/>
+      </feDiffuseLighting>
+      <feComposite in="light" in2="d" operator="arithmetic" k1="1.12" k2="0" k3="0" k4="0" result="lit"/>
+      <feComposite in="lit" in2="d" operator="in"/>
+    </filter>
+
+    <clipPath id="bubbleClip"><path id="bubbleClipPath"/></clipPath>
+  </defs>
+
+  <!-- faint ghost marks of an old whiteboard -->
+  <g opacity=".18" stroke="#555" stroke-linecap="round" fill="none">
+    <path d="M70 120 l40 -6" stroke-width="5"/>
+    <path d="M905 160 l22 -4" stroke-width="4"/>
+    <path d="M860 760 l30 -2" stroke-width="5"/>
+    <path d="M120 620 q60 -20 140 -4" stroke-width="2"/>
+  </g>
+
+  <g id="scene">
+    <!-- ======= THE FACE ======= -->
+    <g id="headWrap" transform="translate(30,100)">
+      <g id="head" filter="url(#boil)" stroke="#2a2424" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <!-- ears -->
+        <ellipse cx="128" cy="388" rx="20" ry="46" stroke-width="7"/>
+        <ellipse cx="472" cy="378" rx="22" ry="48" stroke-width="7"/>
+        <!-- face outline -->
+        <circle cx="300" cy="380" r="172" stroke-width="5" fill="#f3f3f4" fill-opacity=".35"/>
+        <!-- hair & beard (generated) -->
+        <path id="hair" stroke-width="5.5"/>
+        <path id="beard" stroke-width="5.5"/>
+        <path id="goatee" stroke-width="5.5"/>
+
+        <!-- eyebrows -->
+        <g id="brows">
+          <polyline id="browL" points="196,330 226,304 256,326" stroke-width="17"/>
+          <polyline id="browR" points="330,322 362,298 396,320" stroke-width="17"/>
+        </g>
+
+        <!-- eyes (behind glasses) -->
+        <g id="eyeL" transform="translate(235 376)">
+          <g class="lid">
+            <ellipse rx="36" ry="20" fill="#2a2424" stroke="none"/>
+            <ellipse class="white" rx="18" ry="10" fill="#f6f6f6" stroke="none"/>
+            <circle class="pupil" r="5" fill="#1d1919" stroke="none"/>
+          </g>
+        </g>
+        <g id="eyeR" transform="translate(372 372)">
+          <g class="lid">
+            <ellipse rx="40" ry="20" fill="#2a2424" stroke="none"/>
+            <ellipse class="white" rx="20" ry="10" fill="#f6f6f6" stroke="none"/>
+            <circle class="pupil" r="5" fill="#1d1919" stroke="none"/>
+          </g>
+        </g>
+
+        <!-- glasses -->
+        <ellipse cx="236" cy="376" rx="58" ry="52" stroke-width="7"/>
+        <ellipse cx="372" cy="372" rx="60" ry="50" stroke-width="7"/>
+        <path d="M294 372 Q303 368 312 371" stroke-width="7"/>
+        <path d="M178 380 L132 380" stroke-width="6"/>
+        <path d="M432 371 L472 368" stroke-width="6"/>
+
+        <!-- nose -->
+        <path d="M282 422 Q284 448 308 449 Q332 448 334 420" stroke-width="7"/>
+
+        <!-- mouth -->
+        <g id="mouthClosed">
+          <path d="M266 478 Q302 466 342 478" stroke-width="15"/>
+          <path d="M276 492 Q306 500 334 490" stroke-width="9"/>
+        </g>
+        <g id="mouthOpen" style="display:none">
+          <path d="M268 474 Q304 462 340 474 Q334 508 304 510 Q274 508 268 474 Z" fill="#2a2424" stroke-width="8"/>
+          <path d="M284 494 Q304 486 324 494" stroke="#7a6d6d" stroke-width="5"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- ======= NEWSPAPER SPEECH BUBBLE ======= -->
+    <g id="bubbleWrap" style="display:none">
+      <g id="bubble" filter="url(#crumple)">
+        <g clip-path="url(#bubbleClip)">
+          <rect x="-270" y="-140" width="540" height="380" fill="#ebe5d3"/>
+          <g id="paperColumns" fill="#8f8a7d"></g>
+          <!-- masthead -->
+          <text x="0" y="-92" text-anchor="middle" font-family="Old Standard TT, Georgia, serif" font-weight="700" font-size="17" letter-spacing="3" fill="#3a3530">LE QUOTIDIEN DU TABLEAU</text>
+          <line x1="-232" y1="-82" x2="232" y2="-82" stroke="#3a3530" stroke-width="2"/>
+          <line x1="-232" y1="-77" x2="232" y2="-77" stroke="#3a3530" stroke-width="1"/>
+          <text x="-232" y="-66" font-family="Old Standard TT, Georgia, serif" font-size="10" fill="#5a544b">N° 1 — ÉDITION SPÉCIALE</text>
+          <text x="232" y="-66" text-anchor="end" font-family="Old Standard TT, Georgia, serif" font-size="10" fill="#5a544b">PRIX : 1 FEUTRE</text>
+          <!-- headline -->
+          <rect x="-236" y="-58" width="472" height="128" fill="#efe9d8"/>
+          <text x="0" y="-8" text-anchor="middle" font-family="Abril Fatface, Georgia, serif" font-size="50" fill="#1d1a17">je m'appelle</text>
+          <text x="0" y="52" text-anchor="middle" font-family="Abril Fatface, Georgia, serif" font-size="54" fill="#1d1a17">momo le habess</text>
+          <line x1="-232" y1="74" x2="232" y2="74" stroke="#3a3530" stroke-width="1.5"/>
+          <!-- little fake photo -->
+          <rect x="128" y="84" width="104" height="70" fill="#b9b3a3"/>
+          <circle cx="180" cy="116" r="20" fill="#8f8a7d"/>
+        </g>
+        <path id="bubbleOutline" fill="none" stroke="#2a2424" stroke-width="7" stroke-linejoin="round"/>
+      </g>
+    </g>
+  </g>
+</svg>
+<div class="flicker" id="flicker"></div>
+</div>
+<div class="controls">
+  <button id="replay" type="button">↺ Rejouer</button>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- helpers ----------
+  function rng(seed) {
+    return function () {
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  var $ = function (id) { return document.getElementById(id); };
+  var CX = 300, CY = 380, R = 172;
+
+  function polar(a, r) {
+    var rad = a * Math.PI / 180;
+    return [CX + Math.cos(rad) * r, CY + Math.sin(rad) * r];
+  }
+
+  // zig-zag scribble band along an arc (like the marker hair / beard)
+  function scribbleArc(rand, a0, a1, step, rIn, rOut) {
+    var d = "", first = true;
+    for (var a = a0; a <= a1; a += step * (0.7 + rand() * 0.6)) {
+      var inner = polar(a + (rand() - .5) * 2, rIn + (rand() - .5) * 10);
+      var outer = polar(a + step * .45 + (rand() - .5) * 2, rOut + (rand() - .5) * 12);
+      d += (first ? "M" : "L") + inner[0].toFixed(1) + " " + inner[1].toFixed(1) +
+           " L" + outer[0].toFixed(1) + " " + outer[1].toFixed(1);
+      first = false;
+    }
+    return d;
+  }
+
+  // ---------- build hair & beard ----------
+  (function build() {
+    var r = rng(42);
+    var hair = scribbleArc(r, 192, 348, 6.5, R - 36, R + 12) + " " +
+               scribbleArc(r, 212, 328, 8, R - 74, R - 36);
+    $("hair").setAttribute("d", hair);
+
+    var beard = scribbleArc(r, 10, 170, 7, R - 34, R + 2);
+    $("beard").setAttribute("d", beard);
+
+    // goatee under the mouth
+    var g = "", x;
+    for (x = 258; x <= 346; x += 11 + r() * 4) {
+      var top = 506 + r() * 6, bot = 548 + r() * 10;
+      g += "M" + x.toFixed(1) + " " + bot.toFixed(1) + " L" + (x + 4).toFixed(1) + " " + top.toFixed(1) + " ";
+    }
+    $("goatee").setAttribute("d", g);
+
+    // bubble shape (local coords, centred on 0,0)
+    var bubble = "M-230 -120 H230 Q250 -120 250 -100 V100 Q250 120 230 120 H-80 L-205 215 L-150 120 H-230 Q-250 120 -250 100 V-100 Q-250 -120 -230 -120 Z";
+    $("bubbleClipPath").setAttribute("d", bubble);
+    $("bubbleOutline").setAttribute("d", bubble);
+
+    // newspaper columns of "text"
+    var cols = $("paperColumns"), ns = "http://www.w3.org/2000/svg";
+    var html = "";
+    var colX = [-232, -112, 8];
+    for (var c = 0; c < colX.length; c++) {
+      for (var y = 86; y < 232; y += 8) {
+        var w = 108 - (r() < .15 ? 30 + r() * 50 : r() * 8);
+        html += '<rect x="' + colX[c] + '" y="' + y + '" width="' + w.toFixed(0) + '" height="3"/>';
+      }
+    }
+    // also behind the masthead area on the sides
+    cols.innerHTML = html;
+  })();
+
+  // ---------- timeline ----------
+  var FPS = 12;           // stop-motion frame rate ("on twos" feel)
+  var LOOP = 17;          // seconds
+  var BUBBLE_POS = [720, 215];
+  var TAIL_TIP = [515, 430];
+
+  function ease(p) { return p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2; }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  // keyframes: [[t, value], ...] -> interpolated value (numbers or arrays)
+  function track(t, keys) {
+    if (t <= keys[0][0]) return keys[0][1];
+    for (var i = 1; i < keys.length; i++) {
+      if (t <= keys[i][0]) {
+        var a = keys[i - 1], b = keys[i];
+        var p = ease((t - a[0]) / (b[0] - a[0]));
+        if (Array.isArray(a[1])) return a[1].map(function (v, j) { return v + (b[1][j] - v) * p; });
+        return a[1] + (b[1] - a[1]) * p;
+      }
+    }
+    return keys[keys.length - 1][1];
+  }
+
+  var pupilKeys = [
+    [0, [0, 0]], [1.6, [0, 0]],
+    [2.0, [-13, 1]], [2.6, [-13, 1]],      // look left
+    [3.0, [13, 1]], [3.6, [13, 1]],        // look right
+    [3.9, [8, -5]], [4.3, [8, -5]],        // glance up-right
+    [4.6, [0, 0]],
+    [6.4, [0, 0]], [6.8, [12, -5]], [9.6, [12, -5]], // watch the bubble
+    [10.0, [0, 1]], [17, [0, 1]]           // back to the viewer
+  ];
+  var headRot = [
+    [0, 0], [4.6, 0], [5.0, -9], [5.5, -9], [6.0, 8], [6.5, 8], [6.9, 0],
+    [9.8, 0], [10.4, -3], [11.2, 3], [12.0, -3], [12.8, 3], [13.6, 0], [17, 0]
+  ];
+  var headY = [
+    [0, 0], [6.9, 0], [7.1, 10], [7.3, -6], [7.5, 0], [17, 0]
+  ];
+  var browLift = [
+    [0, 0], [3.8, 0], [4.0, -8], [4.4, -8], [4.6, 0],
+    [6.6, 0], [6.8, -12], [8.6, -12], [9.0, 0], [17, 0]
+  ];
+  var blinks = [1.2, 5.8, 11.5, 15.2];
+
+  var $headWrap = $("headWrap"), $boil = $("boilNoise");
+  var eyes = ["eyeL", "eyeR"].map(function (id) {
+    var g = $(id);
+    return { lid: g.querySelector(".lid"), white: g.querySelector(".white"), pupil: g.querySelector(".pupil") };
+  });
+  var $browL = $("browL"), $browR = $("browR");
+  var $mouthOpen = $("mouthOpen"), $mouthClosed = $("mouthClosed");
+  var $bubbleWrap = $("bubbleWrap"), $bubble = $("bubble");
+  var $disp = $("crumpleDisp"), $light = $("crumpleLight"), $cNoise = $("crumpleNoise");
+  var $scene = $("scene"), $flicker = $("flicker");
+
+  var jit = rng(7);
+
+  function render(frame) {
+    var t = (frame / FPS) % LOOP;
+
+    // boiling lines: swap noise seed every frame (3 drawings cycle)
+    $boil.setAttribute("seed", (frame % 3) + 1);
+
+    // camera jitter + exposure flicker, like a real frame-by-frame shoot
+    var jx = (jit() - .5) * 3, jy = (jit() - .5) * 3;
+    $scene.setAttribute("transform", "translate(" + jx.toFixed(2) + " " + jy.toFixed(2) + ")");
+    $flicker.style.opacity = (jit() * 0.045).toFixed(3);
+
+    // head
+    var rot = track(t, headRot), hy = track(t, headY);
+    $headWrap.setAttribute("transform",
+      "translate(30 " + (100 + hy).toFixed(1) + ") rotate(" + rot.toFixed(2) + " 300 560)");
+
+    // eyes
+    var p = track(t, pupilKeys);
+    var blink = 1;
+    blinks.forEach(function (b) {
+      var d = Math.abs(t - b);
+      if (d < 0.09) blink = 0.08; else if (d < 0.17) blink = 0.5;
+    });
+    eyes.forEach(function (e) {
+      e.lid.setAttribute("transform", "scale(1 " + blink + ")");
+      e.white.setAttribute("cx", (p[0] * .35).toFixed(1));
+      e.white.setAttribute("cy", (p[1] * .3).toFixed(1));
+      e.pupil.setAttribute("cx", p[0].toFixed(1));
+      e.pupil.setAttribute("cy", p[1].toFixed(1));
+    });
+
+    // eyebrows
+    var bl = track(t, browLift);
+    $browL.setAttribute("transform", "translate(0 " + bl.toFixed(1) + ")");
+    $browR.setAttribute("transform", "translate(0 " + (bl * 1.15).toFixed(1) + ") rotate(" + (bl * .4).toFixed(1) + " 362 300)");
+
+    // mouth: talks while the headline unfolds and is read
+    var talking = t > 9.4 && t < 13.8;
+    var open = talking && (Math.floor(frame / 2) % 3 !== 2);
+    if (t > 6.7 && t < 7.0) open = true; // little "oh!" when the bubble pops
+    $mouthOpen.style.display = open ? "" : "none";
+    $mouthClosed.style.display = open ? "none" : "";
+
+    // newspaper bubble
+    if (t < 6.8) {
+      $bubbleWrap.style.display = "none";
+    } else {
+      $bubbleWrap.style.display = "";
+      var fly = clamp((t - 6.8) / 0.6, 0, 1);       // crumpled ball flies out
+      var unfold = clamp((t - 7.5) / 2.0, 0, 1);    // then un-crumples
+      var steppedUnfold = Math.round(unfold * 10) / 10; // chunky stop-motion steps
+      var fx = TAIL_TIP[0] + (BUBBLE_POS[0] - TAIL_TIP[0]) * ease(fly);
+      var fy = TAIL_TIP[1] + (BUBBLE_POS[1] - TAIL_TIP[1]) * ease(fly) - Math.sin(fly * Math.PI) * 60;
+      var u = ease(steppedUnfold);
+      var sc = 0.16 + 0.84 * u;
+      var spin = (1 - u) * -320 + (1 - fly) * -180;
+      // a little settle wobble once flat
+      if (unfold >= 1) spin = Math.sin((t - 9.5) * 9) * Math.max(0, 1.5 - (t - 9.5)) * 1.2;
+      $bubble.setAttribute("transform",
+        "translate(" + fx.toFixed(1) + " " + fy.toFixed(1) + ") rotate(" + spin.toFixed(1) + ") scale(" + sc.toFixed(3) + ")");
+      var crumple = 1 - u;
+      $disp.setAttribute("scale", (2 + 110 * Math.pow(crumple, 1.3)).toFixed(1));
+      $light.setAttribute("surfaceScale", (0.6 + 12 * crumple).toFixed(2));
+      $cNoise.setAttribute("seed", 11 + (frame % 2)); // paper rustles
+    }
+  }
+
+  // ---------- loop at a fixed stop-motion frame rate ----------
+  var start = performance.now(), last = -1;
+  function tick(now) {
+    var frame = Math.floor((now - start) / 1000 * FPS);
+    if (frame !== last) { last = frame; render(frame); }
+    requestAnimationFrame(tick);
+  }
+  $("replay").addEventListener("click", function () { start = performance.now(); last = -1; });
+
+  // ?t=8.5 freezes on a given second (handy for stills)
+  var q = new URLSearchParams(location.search).get("t");
+  if (q !== null) render(Math.round(parseFloat(q) * FPS));
+  else requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
