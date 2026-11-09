@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cosmo pousse Momo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: #2b2f36;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: Bangers, Impact, sans-serif; overflow: hidden;
+  }
+  .stage {
+    position: relative;
+    width: min(100vw, calc((100vh - 64px) * 800 / 600));
+    aspect-ratio: 800 / 600;
+    overflow: hidden;
+  }
+  .stage svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .controls { height: 64px; display: flex; align-items: center; }
+  button {
+    font: 20px Bangers, Impact, sans-serif; letter-spacing: 1px;
+    padding: 6px 20px; border: 3px solid #111; border-radius: 6px;
+    background: #ffd54a; color: #111; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" aria-label="Cosmo le robot pousse la tête de Momo hors de l'écran, en stop motion">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#cfd8e3"/><stop offset="1" stop-color="#b7c3d1"/>
+    </linearGradient>
+    <linearGradient id="table" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c79a6b"/><stop offset="1" stop-color="#a4774b"/>
+    </linearGradient>
+    <linearGradient id="plastic" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#eceff2"/><stop offset="1" stop-color="#cdd2d8"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d9d4c8"/><stop offset="1" stop-color="#9c978c"/>
+    </linearGradient>
+    <radialGradient id="screenGlow" cx=".5" cy=".4" r=".7">
+      <stop offset="0" stop-color="#1b1f26"/><stop offset="1" stop-color="#050608"/>
+    </radialGradient>
+    <filter id="eyeGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- tread pattern -->
+    <pattern id="treadPat" width="12" height="14" patternUnits="userSpaceOnUse">
+      <rect width="12" height="14" fill="#1c1d20"/>
+      <rect y="0" width="12" height="5" fill="#34363b"/>
+    </pattern>
+    <clipPath id="screenClip"><rect x="-74" y="-276" width="148" height="104" rx="22"/></clipPath>
+    <filter id="boil" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence id="boilNoise" type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+
+  <!-- set: wall + table -->
+  <rect width="800" height="420" fill="url(#wall)"/>
+  <rect y="410" width="800" height="190" fill="url(#table)"/>
+  <rect y="408" width="800" height="6" fill="#8a6440"/>
+  <g opacity=".18" stroke="#6b4a2a" stroke-width="2" fill="none">
+    <path d="M0 470 Q200 460 420 476 T800 468"/>
+    <path d="M0 530 Q240 540 480 524 T800 536"/>
+  </g>
+
+  <g id="scene">
+    <!-- ======= MOMO'S HEAD (rolling object) ======= -->
+    <ellipse id="momoShadow" cx="0" cy="512" rx="95" ry="13" fill="#000" opacity=".25"/>
+    <g id="momo">
+      <g transform="scale(0.6) translate(-300 -380)">
+        <g filter="url(#boil)" stroke="#2a2424" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <circle cx="300" cy="380" r="178" fill="#f4f4f5" stroke="#c7c9cc" stroke-width="4"/>
+          <ellipse cx="136" cy="388" rx="18" ry="44" stroke-width="7"/>
+          <ellipse cx="464" cy="378" rx="20" ry="46" stroke-width="7"/>
+          <circle cx="300" cy="380" r="160" stroke-width="5"/>
+          <path id="mHair" stroke-width="5.5"/>
+          <path id="mBeard" stroke-width="5.5"/>
+          <path id="mGoatee" stroke-width="5.5"/>
+          <polyline id="mBrowL" points="196,330 226,304 256,326" stroke-width="17"/>
+          <polyline id="mBrowR" points="330,322 362,298 396,320" stroke-width="17"/>
+          <g transform="translate(235 376)"><g class="mlid">
+            <ellipse rx="36" ry="20" fill="#2a2424" stroke="none"/>
+            <ellipse class="mwhite" rx="18" ry="10" fill="#f6f6f6" stroke="none"/>
+            <circle class="mpupil" r="5" fill="#1d1919" stroke="none"/></g></g>
+          <g transform="translate(372 372)"><g class="mlid">
+            <ellipse rx="40" ry="20" fill="#2a2424" stroke="none"/>
+            <ellipse class="mwhite" rx="20" ry="10" fill="#f6f6f6" stroke="none"/>
+            <circle class="mpupil" r="5" fill="#1d1919" stroke="none"/></g></g>
+          <ellipse cx="236" cy="376" rx="58" ry="52" stroke-width="7"/>
+          <ellipse cx="372" cy="372" rx="60" ry="50" stroke-width="7"/>
+          <path d="M294 372 Q303 368 312 371" stroke-width="7"/>
+          <path d="M178 380 L150 380" stroke-width="6"/>
+          <path d="M432 371 L452 369" stroke-width="6"/>
+          <path d="M282 422 Q284 448 308 449 Q332 448 334 420" stroke-width="7"/>
+          <g id="mMouthClosed">
+            <path d="M266 478 Q302 466 342 478" stroke-width="15"/>
+            <path d="M276 492 Q306 500 334 490" stroke-width="9"/>
+          </g>
+          <g id="mMouthO" style="display:none">
+            <ellipse cx="304" cy="484" rx="20" ry="24" fill="#2a2424" stroke-width="6"/>
+          </g>
+        </g>
+      </g>
+    </g>
+
+    <!-- dust puffs -->
+    <g id="dust" fill="#e9dccb" stroke="#b79e80" stroke-width="2" style="display:none">
+      <circle cx="0" cy="0" r="12"/><circle cx="-18" cy="6" r="9"/><circle cx="-30" cy="-4" r="7"/>
+    </g>
+
+    <!-- shadow -->
+    <ellipse id="shadow" cx="0" cy="512" rx="150" ry="18" fill="#000" opacity=".25"/>
+
+    <g id="robot">
+      <g id="bodyBob">
+        <!-- treads -->
+        <g id="treadL">
+          <rect x="-160" y="-118" width="48" height="122" rx="22" fill="url(#treadPat)" id="treadLRect"/>
+          <circle cx="-136" cy="-30" r="20" fill="#e9ecef" stroke="#b9bec4" stroke-width="3"/>
+          <rect x="-141" y="-35" width="10" height="10" fill="#d23a3a"/>
+        </g>
+        <g id="treadR">
+          <rect x="112" y="-118" width="48" height="122" rx="22" fill="url(#treadPat)" id="treadRRect"/>
+          <circle cx="136" cy="-30" r="20" fill="#e9ecef" stroke="#b9bec4" stroke-width="3"/>
+          <rect x="131" y="-35" width="10" height="10" fill="#d23a3a"/>
+        </g>
+
+        <!-- body -->
+        <rect x="-112" y="-150" width="224" height="140" rx="26" fill="url(#plastic)" stroke="#a9afb6" stroke-width="3"/>
+        <rect x="-80" y="-112" width="160" height="92" rx="16" fill="url(#metal)"/>
+        <rect x="-10" y="-46" width="20" height="14" rx="3" fill="#2a2a2a"/>
+        <g stroke="#c9c2b3" stroke-width="4" stroke-linecap="round">
+          <line x1="-40" y1="-24" x2="40" y2="-24"/>
+        </g>
+
+        <!-- head -->
+        <g id="head">
+          <rect x="-92" y="-296" width="184" height="148" rx="34" fill="url(#plastic)" stroke="#a9afb6" stroke-width="3"/>
+          <!-- red side buttons -->
+          <circle cx="-96" cy="-224" r="24" fill="#d23a3a"/>
+          <circle cx="-96" cy="-224" r="14" fill="#f2f2f2"/>
+          <circle cx="96" cy="-224" r="24" fill="#d23a3a"/>
+          <circle cx="96" cy="-224" r="14" fill="#f2f2f2"/>
+          <!-- screen -->
+          <rect x="-74" y="-276" width="148" height="104" rx="22" fill="url(#screenGlow)"/>
+          <g clip-path="url(#screenClip)">
+            <g id="eyes" filter="url(#eyeGlow)" fill="#3fc7ff">
+              <path id="eyeL"/>
+              <path id="eyeR"/>
+            </g>
+          </g>
+          <rect x="-12" y="-156" width="24" height="12" rx="3" fill="#7e7e7e"/>
+        </g>
+      </g>
+
+      <!-- lift arms + fork (drawn on top: they pass in front of the face) -->
+      <g id="lift">
+        <path id="armL" fill="none" stroke="#f4f5f6" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+        <path id="armR" fill="none" stroke="#f4f5f6" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+        <path id="armLs" fill="none" stroke="#b3b8be" stroke-width="3" stroke-linecap="round"/>
+        <path id="armRs" fill="none" stroke="#b3b8be" stroke-width="3" stroke-linecap="round"/>
+        <g id="fork">
+          <path d="M-104 -26 V8 Q-104 18 -94 18 H94 Q104 18 104 8 V-26" fill="none" stroke="#f4f5f6" stroke-width="18" stroke-linejoin="round"/>
+          <path d="M-104 -26 V8 Q-104 18 -94 18 H94 Q104 18 104 8 V-26" fill="none" stroke="#b3b8be" stroke-width="2" transform="translate(0 8)"/>
+          <rect x="-112" y="-34" width="18" height="12" rx="3" fill="#222"/>
+          <rect x="94" y="-34" width="18" height="12" rx="3" fill="#222"/>
+          <g stroke="#c9c2b3" stroke-width="3" stroke-linecap="round">
+            <line x1="-26" y1="10" x2="26" y2="10"/><line x1="-20" y1="16" x2="20" y2="16"/>
+          </g>
+        </g>
+      </g>
+
+      <!-- anger marks -->
+      <g id="anger" fill="none" stroke="#e02424" stroke-width="7" stroke-linecap="round" style="display:none">
+        <g transform="translate(118 -300)">
+          <path d="M-14 -4 Q-4 -4 -4 -14"/><path d="M4 -14 Q4 -4 14 -4"/>
+          <path d="M14 4 Q4 4 4 14"/><path d="M-4 14 Q-4 4 -14 4"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- speed / shake lines -->
+    <g id="shakeLines" stroke="#333" stroke-width="5" stroke-linecap="round" style="display:none">
+      <path d="M0 0 l-22 -10"/><path d="M0 22 l-28 0"/><path d="M0 44 l-22 10"/>
+    </g>
+
+    <!-- speech bubble -->
+    <g id="bubble" style="display:none">
+      <path d="M-170 -95 Q-190 -95 -190 -75 V55 Q-190 75 -170 75 H-110 L-170 140 L-60 75 H170 Q190 75 190 55 V-75 Q190 -95 170 -95 Z"
+            fill="#fff" stroke="#111" stroke-width="6" stroke-linejoin="round"/>
+      <g id="bubbleText" font-family="Bangers, Impact, sans-serif" text-anchor="middle" fill="#111" letter-spacing="1">
+        <text x="0" y="-40" font-size="40">Mohammed revient</text>
+        <text x="0" y="8" font-size="40">c'est l'heure</text>
+        <text x="0" y="56" font-size="48" fill="#e02424">habbess !</text>
+      </g>
+    </g>
+  </g>
+</svg>
+</div>
+<div class="controls"><button id="replay" type="button">↺ Rejouer</button></div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var FPS = 12, DUR = 4.0, HOLD = 1.0;
+
+  function ease(p) { return p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2; }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function track(t, keys) {
+    if (t <= keys[0][0]) return keys[0][1];
+    for (var i = 1; i < keys.length; i++) {
+      if (t <= keys[i][0]) {
+        var a = keys[i - 1], b = keys[i], p = ease((t - a[0]) / (b[0] - a[0]));
+        if (Array.isArray(a[1])) return a[1].map(function (v, j) { return v + (b[1][j] - v) * p; });
+        return a[1] + (b[1] - a[1]) * p;
+      }
+    }
+    return keys[keys.length - 1][1];
+  }
+  function noise(frame, k) {
+    var x = Math.sin(frame * 127.1 + k * 311.7) * 43758.5453;
+    return x - Math.floor(x);
+  }
+  function rng(seed) {
+    return function () {
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  // ---------- build Momo's marker hair & beard ----------
+  (function () {
+    var CX = 300, CY = 380, R = 160, r = rng(42);
+    function polar(a, rad) { a *= Math.PI / 180; return [CX + Math.cos(a) * rad, CY + Math.sin(a) * rad]; }
+    function arc(a0, a1, step, rIn, rOut) {
+      var d = "", first = true;
+      for (var a = a0; a <= a1; a += step * (0.7 + r() * 0.6)) {
+        var i = polar(a + (r() - .5) * 2, rIn + (r() - .5) * 10);
+        var o = polar(a + step * .45 + (r() - .5) * 2, rOut + (r() - .5) * 12);
+        d += (first ? "M" : "L") + i[0].toFixed(1) + " " + i[1].toFixed(1) + " L" + o[0].toFixed(1) + " " + o[1].toFixed(1);
+        first = false;
+      }
+      return d;
+    }
+    $("mHair").setAttribute("d", arc(192, 348, 9, R - 34, R + 10) + " " + arc(214, 326, 11, R - 68, R - 34));
+    $("mBeard").setAttribute("d", arc(12, 168, 9.5, R - 32, R + 2));
+    var g = "";
+    for (var x = 258; x <= 346; x += 15 + r() * 4) {
+      g += "M" + x.toFixed(1) + " " + (540 + r() * 8).toFixed(1) + " L" + (x + 4).toFixed(1) + " " + (504 + r() * 6).toFixed(1) + " ";
+    }
+    $("mGoatee").setAttribute("d", g);
+  })();
+
+  function eyePath(cx, cy, w, h, slant) {
+    var r = Math.min(8, h / 2), x0 = cx - w / 2, x1 = cx + w / 2, yb = cy + h / 2;
+    var ytL = cy - h / 2 + Math.max(0, slant), ytR = cy - h / 2 + Math.max(0, -slant);
+    return "M" + (x0 + r) + " " + ytL +
+      " L" + (x1 - r) + " " + ytR + " Q" + x1 + " " + ytR + " " + x1 + " " + (ytR + r) +
+      " L" + x1 + " " + (yb - r) + " Q" + x1 + " " + yb + " " + (x1 - r) + " " + yb +
+      " L" + (x0 + r) + " " + yb + " Q" + x0 + " " + yb + " " + x0 + " " + (yb - r) +
+      " L" + x0 + " " + (ytL + r) + " Q" + x0 + " " + ytL + " " + (x0 + r) + " " + ytL + " Z";
+  }
+  // happy "^ ^" eyes
+  function happyEye(cx, cy) {
+    return "M" + (cx - 20) + " " + (cy + 8) + " Q" + cx + " " + (cy - 22) + " " + (cx + 20) + " " + (cy + 8) +
+           " L" + (cx + 12) + " " + (cy + 12) + " Q" + cx + " " + (cy - 8) + " " + (cx - 12) + " " + (cy + 12) + " Z";
+  }
+
+  var GROUND = 500, MOMO_R = 107, ROBOT_HALF = 160;
+  var MOMO_X0 = 565;
+  // robot path: drive in, pause, push, stop
+  var robotX = [[0, -200], [1.0, 262], [1.1, 270], [1.6, 270], [2.7, 450], [2.8, 456], [4, 456]];
+
+  var el = {
+    robot: $("robot"), bob: $("bodyBob"), head: $("head"), eyeL: $("eyeL"), eyeR: $("eyeR"),
+    armL: $("armL"), armR: $("armR"), armLs: $("armLs"), armRs: $("armRs"), fork: $("fork"),
+    shadow: $("shadow"), scene: $("scene"), momo: $("momo"), momoShadow: $("momoShadow"),
+    dust: $("dust"), boil: $("boilNoise"), shake: $("shakeLines"), anger: $("anger"), bubble: $("bubble")
+  };
+  var mPupils = document.querySelectorAll(".mpupil"), mWhites = document.querySelectorAll(".mwhite");
+  var mBrowL = $("mBrowL"), mBrowR = $("mBrowR");
+
+  function setLift(h) {
+    var forkY = -40 - h * 250, px = 128, py = -186;
+    var midY = (py + forkY) / 2 - 30 + h * 30;
+    el.fork.setAttribute("transform", "translate(0 " + forkY.toFixed(1) + ")");
+    [[-1, el.armL, el.armLs], [1, el.armR, el.armRs]].forEach(function (s) {
+      var sx = s[0];
+      var d = "M" + (sx * px) + " " + py + " Q" + (sx * (px + 20)) + " " + midY.toFixed(1) +
+              " " + (sx * 104) + " " + (forkY - 26).toFixed(1);
+      s[1].setAttribute("d", d); s[2].setAttribute("d", d);
+      s[2].setAttribute("transform", "translate(" + (sx * -6) + " 4)");
+    });
+  }
+
+  function render(frame) {
+    var t = (frame / FPS) % (DUR + HOLD);
+    el.shake.style.display = "none"; el.anger.style.display = "none"; el.bubble.style.display = "none";
+    el.boil.setAttribute("seed", (frame % 3) + 1);
+
+    var jx = (noise(frame, 1) - .5) * 4, jy = (noise(frame, 2) - .5) * 3;
+    el.scene.setAttribute("transform", "translate(" + jx.toFixed(1) + " " + jy.toFixed(1) + ")");
+
+    var x = track(t, robotX);
+    var driving = t < 1.05 || (t > 1.6 && t < 2.75);
+    var pushing = t > 1.6 && t < 2.75;
+    var victory = t > 2.9;
+
+    // ---- Momo's head: pushed while in contact, then a final shove sends it rolling away
+    var contactX = x + ROBOT_HALF + MOMO_R - 4;
+    var mx;
+    if (t < 1.6) mx = MOMO_X0;
+    else if (t < 2.55) mx = Math.max(MOMO_X0, contactX);
+    else {
+      var x0 = 456 + ROBOT_HALF + MOMO_R - 4, dt = t - 2.55;
+      mx = x0 + 230 * dt + 160 * dt * dt;        // speeds up as it rolls off
+    }
+    var roll = (mx - MOMO_X0) / MOMO_R * 180 / Math.PI;
+    var wob = (t >= 1.6 && t < 1.75) ? -6 : 0;   // squash at first contact
+    el.momo.setAttribute("transform", "translate(" + mx.toFixed(1) + " " + (GROUND - MOMO_R + 1) + ") rotate(" + (roll + wob).toFixed(1) + ")");
+    el.momoShadow.setAttribute("cx", mx.toFixed(1));
+    // Momo's expression: watching the robot, then panicked
+    var worried = t > 1.1;
+    var px = t < 0.4 ? 0 : -12, py = 0;
+    mPupils.forEach(function (p) { p.setAttribute("cx", px); p.setAttribute("cy", py); });
+    mWhites.forEach(function (w) { w.setAttribute("cx", px * .35); });
+    mBrowL.setAttribute("transform", "translate(0 " + (worried ? -14 : 0) + ")");
+    mBrowR.setAttribute("transform", "translate(0 " + (worried ? -14 : 0) + ")");
+    $("mMouthO").style.display = t > 1.6 ? "" : "none";
+    $("mMouthClosed").style.display = t > 1.6 ? "none" : "";
+
+    // dust when the head is shoved
+    if (pushing && frame % 2 === 0) {
+      el.dust.style.display = "";
+      el.dust.setAttribute("transform", "translate(" + (x - 150).toFixed(1) + " " + (GROUND - 8) + ") scale(" + (0.7 + noise(frame, 3) * .6).toFixed(2) + ")");
+    } else el.dust.style.display = "none";
+
+    // ---- robot body
+    var bobY = driving ? (frame % 2 ? -3 : 0) : 0;
+    var hop = victory ? (frame % 4 < 2 ? -12 : 0) : 0;
+    var tilt = pushing ? 5 + (noise(frame, 4) - .5) * 3 : (driving ? -3 : 0);
+    el.robot.setAttribute("transform", "translate(" + x.toFixed(1) + " " + (GROUND + hop) + ") rotate(" + tilt.toFixed(1) + " 0 0)");
+    el.shadow.setAttribute("cx", x.toFixed(1));
+    el.shadow.setAttribute("rx", (150 + hop * 2).toFixed(1));
+    el.bob.setAttribute("transform", "translate(0 " + bobY + ")");
+    $("treadPat").setAttribute("y", driving ? (frame * 7) % 14 : 0);
+
+    // eyes: look at the head, then determined while pushing, then happy
+    var lk = t < 1.1 ? 0 : 22;
+    if (victory) lk = 0;
+    el.head.setAttribute("transform", "translate(" + (lk * .35).toFixed(1) + " 0)");
+    var blink = Math.abs(t - 1.35) < 0.05 ? 0.15 : 1;
+    if (victory) {
+      el.eyeL.setAttribute("d", happyEye(-34, -228));
+      el.eyeR.setAttribute("d", happyEye(34, -228));
+    } else {
+      var det = pushing ? 1 : 0;
+      el.eyeL.setAttribute("d", eyePath(-34 + lk, -224 + det * 4, 38, 40 * blink * (1 - det * .3), -det * 12));
+      el.eyeR.setAttribute("d", eyePath(34 + lk, -224 + det * 4, 38, 40 * blink * (1 - det * .3), det * 12));
+    }
+
+    // lift arms: low while pushing, raised in triumph at the end
+    var lift;
+    if (victory) lift = frame % 4 < 2 ? 0.95 : 0.7;
+    else if (pushing) lift = 0.02;
+    else lift = 0.06;
+    setLift(lift);
+  }
+
+  var start = performance.now(), last = -1;
+  function tick(now) {
+    var f = Math.floor((now - start) / 1000 * FPS);
+    if (f !== last) { last = f; render(f); }
+    requestAnimationFrame(tick);
+  }
+  $("replay").addEventListener("click", function () { start = performance.now(); last = -1; });
+  var q = new URLSearchParams(location.search).get("f");
+  if (q !== null) render(parseInt(q, 10));
+  else requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
